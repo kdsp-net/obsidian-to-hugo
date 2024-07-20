@@ -108,9 +108,19 @@ meta_title: "{original_folder_name}"
 def git_commit_and_push(repo_path, branch):
     logging.debug("Committing and pushing changes to Git...")
     repo = git.Repo(repo_path)
+    
+    # Fetch latest changes
+    origin = repo.remote(name='origin')
+    origin.fetch()
+
+    # Check if there are changes to pull
+    current_branch = repo.head.ref
+    if current_branch.tracking_branch().commit != current_branch.commit:
+        logging.debug("Pulling latest changes before pushing...")
+        repo.git.merge(current_branch.tracking_branch())
+
     repo.git.add(A=True)
     repo.index.commit("auto commit")
-    origin = repo.remote(name='origin')
     origin.push(branch)
 
 # Debounce mechanism
